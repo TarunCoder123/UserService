@@ -12,9 +12,9 @@ require('dotenv').config
 
 class App {
     public app:express.Application;
-    public req:express.Request;
-    public res:express.Response;
-    public next:express.NextFunction;
+    // public req:express.Request;
+    // public res:express.Response;
+    // public next:express.NextFunction;
 
     constructor(controllers: Controller[]){
         this.app=express();
@@ -77,3 +77,5 @@ class App {
      });
     }
 }
+
+export default App;

@@ -18,4 +18,5 @@ export const env={
     DB_READ_PORT:process.env.DB_READ_PORT,
     DB_READ_USER:process.env.DB_READ_USER,
     DB_SCHEMA:process.env.DB_SCHEMA,
+    DB_CONNECTION_STRING:process.env.DB_CONNECTION_STRING
 }
