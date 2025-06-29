@@ -1,18 +1,24 @@
 import App from "./app";
 import { log } from "./utils/helper.utils";
 import DBConnectionHandler from "./connection"
+import redisHelper from "./helper/redis.helper";
+import { REDIS_ERR_MSG } from "./constants/redis.constant";
 require('dotenv').config;
 
-(async ()=>{
-    try{
-        const app=new App();
+(async () => {
+    try {
+        const app = new App();
 
         // connect to the postgres server
         const isDBconnected = await DBConnectionHandler.createDBConnection();
         if (!isDBconnected) throw new Error("error is there");
 
+        //connect to the redis server
+        const isRedisConnected = await redisHelper.connectRedis();
+        if (!isRedisConnected) throw new Error(REDIS_ERR_MSG.CONN_ERR);
+
         app.listen();
-    }catch(err){
+    } catch (err) {
         log.red(`error occur during the server file`);
     }
 })();
