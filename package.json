@@ -27,6 +27,7 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.7",
     "prisma": "^6.10.1",
+    "prisma-zod-generator": "^0.8.13",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

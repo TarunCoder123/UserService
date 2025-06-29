@@ -9,14 +9,16 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
-// generator zod {
-//   provider = "zod-prisma"
-//   output   = "../src/zod"
-// }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator zod {
+  provider          = "prisma-zod-generator"
+  output            = "../src/generated-zod-schemas"
+  isGenerateSelect  = true
+  isGenerateInclude = true
 }
 
 model User {
