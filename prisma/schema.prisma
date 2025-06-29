@@ -15,11 +15,11 @@ datasource db {
 }
 
 generator zod {
-  provider          = "prisma-zod-generator"
-  output            = "../src/generated-zod-schemas"
-  isGenerateSelect  = true
-  isGenerateInclude = true
+  provider = "prisma-zod-generator"
+  output   = "../src/zod"
+  models   = ["User"] // 👈 generate zod schema only for this model
 }
+
 
 model User {
   user_id        String   @id @default(uuid()) @db.Uuid
