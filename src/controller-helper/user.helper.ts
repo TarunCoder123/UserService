@@ -16,7 +16,7 @@ class UserHelper {
      * @param {string} password
      * @returns {Promise<ApiResponse>} return after saving the user data
      */
-    public userLogin=async (email:string,name:string,password:string):Promise<ApiResponse> => {
+    public userSignup=async (email:string,name:string,password:string):Promise<ApiResponse> => {
         try{
         // check the email is valid or not
         const valid=isValidEmail(email);
