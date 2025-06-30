@@ -1,4 +1,4 @@
-import { ESResponse } from "../interfaces/index";
+import { ESResponse } from "@interfaces";
 import { Response } from "express";
 import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 
