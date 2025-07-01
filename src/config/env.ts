@@ -1,10 +1,10 @@
 require('dotenv').config();
 
 export const env={
-    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
-    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
-    REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
-    ACCESS_TOKEN_EXPIRY:process.env.ACCESS_TOKEN_EXPIRY,
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
+    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET as string,
+    REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY || "15m",
+    ACCESS_TOKEN_EXPIRY:process.env.ACCESS_TOKEN_EXPIRY || "7d",
     PORT:process.env.PORT,
     DB_WRITE_HOST:process.env.DB_WRITE_HOST,
     DB_WRITE_PORT:process.env.DB_WRITE_PORT,

@@ -38,6 +38,8 @@ class UserController implements Controller  {
     public userLogin=async (req:Request,res:Response)=>{
         const email=String(req.body.email);
         const password=String(req.body.password);
+        const userData=await userHelper.userLogin(email,password);
+        return sendResponse(res,userData);
     }
 
 
