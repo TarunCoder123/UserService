@@ -37,6 +37,7 @@ export const ERR = {
     PROVIDER_ADDRESS_NOT_FOUND: "Provider address is not found",
     NODE_ADDRESS_NOT_FOUND: "Node address is not found",
     BADREQUEST: "Missing required header",
+    MISSING_TOKEN: "Missing Token",
     INVALID_TOKEN: "Invalid token",
     INTERNAL_SERVER_ERROR: "Internal Server Error.",
     NOT_FOUND: "Not Found!",
