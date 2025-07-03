@@ -74,6 +74,17 @@ class UserController implements Controller {
         }
         return sendResponse(res,logoutData);
     }
+    /**
+     * The user can chagnge the password of the account
+     * 
+     */
+    public userChangePassword=async (req:Request,res:Response)=>{
+        const oldPassword=String(req.body.old_password);
+        const newPassword=String(req.body.new_password);
+        const email=String((req as any).user.email);
+        const responseData=await userHelper.userChangePassword(oldPassword,newPassword,email);
+        return sendResponse(res,responseData);
+    }
      
 }
 
