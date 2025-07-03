@@ -166,7 +166,7 @@ class UserHelper {
      *  @param {any} user
      * @returns {Promise<ApiResponse>} return after changing the password 
      */
-    public userLogout = async (user: any) : Promise<ApiResponse>=> {
+    public userLogout = async (user: any): Promise<ApiResponse> => {
         // remove both the token access and refresh token from the redis
         try {
             await redisHelper.removeFromRedis(user.refresh_uuid);
@@ -189,29 +189,67 @@ class UserHelper {
      * @param {string} newPassword
      * @returns {Promise<ApiResponse>} return after changing the password 
      */
-    public userChangePassword = async (oldPassword:string,newPassword:string,email:string) : Promise<ApiResponse> =>{
+    public userChangePassword = async (oldPassword: string, newPassword: string, email: string): Promise<ApiResponse> => {
         // check that email is valid or not
-        const valid = isValidEmail(email);
-        if (!valid) {
+        try {
+            const valid = isValidEmail(email);
+            if (!valid) {
+                return {
+                    error: true,
+                    message: "email is not valid",
+                    status: 400
+                }
+            }
+
+            // check that email is present in the user table or not
+            const responseData = await prisma.user.findUnique({ where: { email } });
+            if (!responseData) {
+                return {
+                    status: STATUS_CODES.UNAUTHORIZED,
+                    message: RESPONSE_MESSAGES.UNAUTHORIZED,
+                    error: true
+                }
+            }
+
+            // check that old password is right or not
+            const compared = await bcrypt.compare(oldPassword, responseData.password);
+
+            if (!compared) {
+                return {
+                    error: true,
+                    message: "Invalid password",
+                    status: 401
+                }
+            }
+
+            // change the date means update the data 
+            const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+            const updataUser = await prisma.user.update({
+                where: { email },
+                data: { password: newHashedPassword },
+            });
+
+            if (!updataUser) {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                    status: STATUS_CODES.INTERNALSERVER
+                }
+            }
+
+            return {
+                error: false,
+                data: { message: "Password successfully changed" },
+                status: STATUS_CODES.SUCCESS
+            }
+        } catch (err: any) {
             return {
                 error: true,
-                message: "email is not valid",
-                status: 400
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
             }
         }
-
-        // check that email is present in the user table or not
-        const responseData=await prisma.user.findUnique({where:{email}});
-        if(!responseData){
-            return {
-                status: STATUS_CODES.UNAUTHORIZED,
-                message: RESPONSE_MESSAGES.UNAUTHORIZED,
-                error: true
-            }
-        }
-
-        // check that old password is right or not
-        const compare
     }
 
 }
