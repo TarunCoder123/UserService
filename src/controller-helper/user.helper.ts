@@ -4,7 +4,7 @@ import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 import prisma from "../client/prisma.client";
 import { ApiResponse } from "../interfaces/user.helpers.interfaces";
 import { isValidEmail } from "./common.helper";
-import { decodeToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.utils';
+import { generateAccessToken, generateRefreshToken } from 'utils/jwt.utils';
 import redisHelper from '../helper/redis.helper';
 import { REDIS_ACCESS_TOKEN_EXP_TIME, REDIS_REFRESH_TOKEN_EXP_TIME } from '../constants/user.constant';
 
@@ -163,10 +163,9 @@ class UserHelper {
     }
     /**
      * The user can logout by this api end point is there
-     *  @param {any} user
-     * @returns {Promise<ApiResponse>} return after changing the password 
+     *  
      */
-    public userLogout = async (user: any) : Promise<ApiResponse>=> {
+    public userLogout = async (user: any) => {
         // remove both the token access and refresh token from the redis
         try {
             await redisHelper.removeFromRedis(user.refresh_uuid);
@@ -182,36 +181,6 @@ class UserHelper {
                 status: Number(409)
             }
         }
-    }
-    /**
-     * The user can change the password by the api end point here
-     * @param {string} oldPassword
-     * @param {string} newPassword
-     * @returns {Promise<ApiResponse>} return after changing the password 
-     */
-    public userChangePassword = async (oldPassword:string,newPassword:string,email:string) : Promise<ApiResponse> =>{
-        // check that email is valid or not
-        const valid = isValidEmail(email);
-        if (!valid) {
-            return {
-                error: true,
-                message: "email is not valid",
-                status: 400
-            }
-        }
-
-        // check that email is present in the user table or not
-        const responseData=await prisma.user.findUnique({where:{email}});
-        if(!responseData){
-            return {
-                status: STATUS_CODES.UNAUTHORIZED,
-                message: RESPONSE_MESSAGES.UNAUTHORIZED,
-                error: true
-            }
-        }
-
-        // check that old password is right or not
-        const compare
     }
 
 }
