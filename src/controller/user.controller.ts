@@ -13,7 +13,10 @@ class UserController implements Controller {
     }
 
     private initializeRoutes = () => {
-
+       this.router.post(`${this.path}/signup`,this.userSignup);
+       this.router.post(`${this.path}/login`,this.userLogin);
+       this.router.get(`${this.path}/logout`,this.userLogut);
+       this.router.post(`${this.path}/change-password`,this.userChangePassword);
     }
 
     /**

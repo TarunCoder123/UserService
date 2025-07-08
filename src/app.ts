@@ -69,12 +69,12 @@ class App {
            this.app.use('/api',controller.router);
         });
              //Unknown rotues handler
-     this.app.all("*",(req:Request,res: Response)=>{
-        sendResponse(res,{
-            status: STATUS_CODES.UNAUTHORIZED,
-            message:RESPONSE_MESSAGES.ROUTE_404,
-        })
-     });
+    //  this.app.all("*",(req:Request,res: Response)=>{
+    //     sendResponse(res,{
+    //         status: STATUS_CODES.UNAUTHORIZED,
+    //         message:RESPONSE_MESSAGES.ROUTE_404,
+    //     })
+    //  });
     }
 }
 

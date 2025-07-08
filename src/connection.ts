@@ -2,6 +2,7 @@ import { log } from "./utils/helper.utils";
 import { EventEmitter } from "events";
 import { connections } from "./utils/constant.utils";
 import prisma from "./client/prisma.client";
+import { env } from "./config/env";
 
 const prismaEvent=new EventEmitter();
 
@@ -24,15 +25,16 @@ class DBConnectionHandler {
         log.green(` ${connections.connected}`);
   
         // Ensure schema exists if needed
-        if (process.env.DB_SCHEMA) {
+        if (env.DB_SCHEMA) {
           await prisma.$executeRawUnsafe(
-            `CREATE SCHEMA IF NOT EXISTS "${process.env.DB_SCHEMA}"`
+            `CREATE SCHEMA IF NOT EXISTS "${env.DB_SCHEMA}"`
           );
-          log.blue(`Schema ${process.env.DB_SCHEMA} ensured`);
+          log.blue(`Schema ${env.DB_SCHEMA} ensured`);
         }
   
         return true;
       } catch (err) {
+        console.log("idhaar aaya hai");
         log.red(`${connections.error}`, err);
         return false;
       }
