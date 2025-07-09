@@ -12,7 +12,7 @@ import redisHelper from "../helper/redis.helper";
  * This is middleware function which is used to validate the user.
  */
 export const sessionCheck = async (
-    req: Request,
+    req: any,
     res: Response,
     next: NextFunction
 ) => {
@@ -107,7 +107,7 @@ export const sessionCheck = async (
         }
 
         // step 5: add the important detail inside the req.user
-        (req as any).user = {
+        req.user = {
             access_uuid: access_uuid,
             refresh_uuid: refresh_uuid,
             email: email
