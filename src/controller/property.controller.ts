@@ -32,7 +32,20 @@ class PropertyController implements Controller {
     const maxPrice=Number(req.query.maxPrice);
     const isActive=Boolean(req.query.isActive);
     const propertiesData=await propertyHelpers.getAllPropertyFilter(userId,propertyId,address,minPrice,maxPrice,isActive,limit,page);
+    return sendResponse(res,propertiesData);
    }
+  /** 
+   * User can post all the property
+   * @param req
+   * @param res
+   * @returns
+  */
+  public postProperty=async (req:any,res:Response)=>{
+    const body:any=(req.body);
+    const email=String(req.user.email);
+    const resultProperty=await propertyHelpers.postProperty(body,email);
+    return sendResponse(res,resultProperty);
+  }
 }
 
 export default PropertyController;

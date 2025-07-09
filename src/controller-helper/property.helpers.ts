@@ -1,4 +1,6 @@
 import prisma from "client/prisma.client";
+import { ApiResponse } from "../interfaces/user.helpers.interfaces";
+import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 
 
 class propertyHelper {
@@ -7,11 +9,16 @@ class propertyHelper {
     }
     /** 
      * The propertyData helper to get the list of the property data under the filter condition
-     * 
-     * 
-     * 
+     * @param {string} userId
+     * @param {string} propertyId
+     * @param {string} address
+     * @param {number} minPrice
+     * @param {number} maxPrice
+     * @param {boolean} isActive
+     * @param {number} limit
+     * @param {number} page
     */
-    public getAllPropertyFilter = async (userId: string, propertyId: string, address: string, minPrice: number, maxPrice: number, isActive: boolean, limit: number, page: number) => {
+    public getAllPropertyFilter = async (userId: string, propertyId: string, address: string, minPrice: number, maxPrice: number, isActive: boolean, limit: number, page: number): Promise<ApiResponse> => {
         try {
             limit = limit || Number(10);
             page = page || Number(1);
@@ -105,14 +112,125 @@ class propertyHelper {
             return {
                 data: {
                     properties: properties,
-
-                }
+                },
+                error: false,
+                message: RESPONSE_MESSAGES.FETCH_DATA_SUCCESS,
+                status: Number(STATUS_CODES.SUCCESS)
             }
         } catch (err) {
-
+            return {
+                error: true,
+                data: { isLogin: false },
+                status: Number(STATUS_CODES.INTERNALSERVER),
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+            };
         }
 
     }
+    /**
+     * The user can post the property for the user
+     * @param {any} body
+     * @param {string} email
+     * @returns
+    */
+    public postProperty = async (body: any, email: string): Promise<ApiResponse> => {
+        try {
+            // step 1:Fetch the userId from the user table
+            const user = await prisma.user.findUnique({
+                where: { email: email },
+                select: { user_id: true },
+            });
+
+            if (!user) {
+                return {
+                    error: true,
+                    data: { message: RESPONSE_MESSAGES.USER_NOT_FOUND },
+                    status: Number(STATUS_CODES.NOTFOUND)
+                }
+            }
+
+            // step 2:Create the property 
+            const property = await prisma.propertyDetails.create({
+                data: {
+                    propertyName: String(body?.propertyName),
+                    address: String(body?.propertyName),
+                    lat: String(body?.propertyName),
+                    long: String(body?.propertyName),
+                    price: String(body?.propertyName),
+                    userId: String(user.user_id),
+                },
+            });
+
+            return {
+                data:{property:property},
+                message:RESPONSE_MESSAGES.SAVEDATA,
+                status: STATUS_CODES.SUCCESS,
+                error:false
+            }
+        } catch (err) {
+            return {
+                error: true,
+                data: { isLogin: false },
+                status: Number(STATUS_CODES.INTERNALSERVER),
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+            };
+        }
+    }
+    /** 
+     * The user can see the property post by him 
+     * @param {string} email
+     * @returns
+    */
+    public getPropertyByMe = async (email:string):Promise<ApiResponse> => {
+        try{
+         // step 1:Fetch the userId from the user table
+         const user = await prisma.user.findUnique({
+            where: { email: email },
+            select: { user_id: true },
+        });
+
+        if (!user) {
+            return {
+                error: true,
+                data: { message: RESPONSE_MESSAGES.USER_NOT_FOUND },
+                status: Number(STATUS_CODES.NOTFOUND)
+            }
+        }
+
+        //step 2:Fetch the property by this userId
+        const propertyDetails=await prisma.propertyDetails.findMany({
+            where:{userId: user.user_id},
+            include:{
+                PropertyComments:true,
+                _count: {
+                    select: {
+                      PropertyLike: true,
+                    },
+                  },
+                PropertyGallery:true
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+        return {
+            data:{property:propertyDetails},
+            message:RESPONSE_MESSAGES.SAVEDATA,
+            status: STATUS_CODES.SUCCESS,
+            error:false
+        }
+    }catch(err){
+        return{
+            error:true,
+            message:RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+            status:STATUS_CODES.INTERNALSERVER
+        }
+    }
+    }
+    /***
+     * The user can see the property post by him the list of the like and comments
+    */
+    
 }
 
 export default new propertyHelper();
