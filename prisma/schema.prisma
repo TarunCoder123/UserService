@@ -33,7 +33,7 @@ model PropertyDetails {
   isDeleted        Boolean            @default(true)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
-  price            String             @db.VarChar(104)
+  price            String             @db.VarChar(100)
   userId           String             @db.Uuid
   PropertyComments PropertyComments[]
   user             User               @relation(fields: [userId], references: [user_id])
