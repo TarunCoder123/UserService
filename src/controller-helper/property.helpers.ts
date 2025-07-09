@@ -201,14 +201,14 @@ class propertyHelper {
         const propertyDetails=await prisma.propertyDetails.findMany({
             where:{userId: user.user_id},
             include:{
-                PropertyComments:true,
-                _count: {
-                    select: {
-                      PropertyLike: true,
-                    },
-                  },
-                PropertyGallery:true
-            },
+            //     PropertyComments:true,
+            //     _count: {
+            //         select: {
+            //           PropertyLike: true,
+            //         },
+            //       },
+               PropertyGallery:true
+             },
             orderBy: {
                 createdAt: "desc",
             },
@@ -229,7 +229,47 @@ class propertyHelper {
     }
     /***
      * The user can see the property post by him the list of the like and comments
+     * 
+     * 
     */
+    public getPropertyLikeAndCommentByMe = async (property_id:string):Promise<ApiResponse> => {
+       try {
+        // fetch the properity like and comment on the basis of the property_id
+        const [propertiesLikeData, propertiesCommentData] = await Promise.all([
+            prisma.propertyLike.findMany({
+              where: { propertyId: property_id },
+              include: {
+                user: {
+                  select: { name: true, email: true },
+                },
+              },
+            }),
+            prisma.propertyComments.findMany({
+              where: { propertyId: property_id },
+              include: {
+                user: {
+                  select: { name: true, email: true },
+                },
+              },
+            }),
+          ]);
+          return {
+            data:{
+                LikeData:propertiesLikeData,
+                CommentData:propertiesCommentData
+            },
+            message:RESPONSE_MESSAGES.FETCH_DATA_SUCCESS,
+            error:false,
+            status:Number(STATUS_CODES.SUCCESS)
+          }
+       }catch(err){
+            return{
+                error:true,
+                message:RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status:STATUS_CODES.INTERNALSERVER
+            }
+       }
+    }
     
 }
 

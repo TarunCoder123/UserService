@@ -6,7 +6,7 @@ import propertyHelpers from "../controller-helper/property.helpers";
 
 
 class PropertyController implements Controller {
-   public path='/property';
+   public path='/system';
    public router=express.Router();
 
    constructor() {
@@ -14,7 +14,10 @@ class PropertyController implements Controller {
    }
 
    private initializeRoutes=()=>{
-      
+    this.router.get(`${this.path}/property`,this.getAllPropertyFilter);
+    this.router.post(`${this.path}/property`,this.postProperty);
+    this.router.get(`${this.path}/my/property`,this.getPropertyByMe);
+    this.router.get(`${this.path}/my/property/stats`,this.getPropertyLikeAndCommentByMe);
    }
    /** 
     * User can view all the property and user can make the filter property of specific city,country and user id.
@@ -46,6 +49,28 @@ class PropertyController implements Controller {
     const resultProperty=await propertyHelpers.postProperty(body,email);
     return sendResponse(res,resultProperty);
   }
+  /** 
+   * User can get all the property posted by him
+   * @param req
+   * @param res
+   * @returns
+  */
+  public getPropertyByMe=async (req:any,res:Response)=>{
+    const email=String(req.user.email);
+    const responseDataProperty=await propertyHelpers.getPropertyByMe(email);
+    return sendResponse(res,responseDataProperty);
+  }
+  /** 
+   * User can get all the property posted by him
+   * @param req
+   * @param res
+   * @returns
+  */
+ public getPropertyLikeAndCommentByMe=async (req:any,res:Response)=>{
+  const property_id=String(req.query.property_id);
+  const PropertyDataLikeAndComment=await propertyHelpers.getPropertyLikeAndCommentByMe(property_id);
+  return sendResponse(res,PropertyDataLikeAndComment);
+ }
 }
 
 export default PropertyController;
