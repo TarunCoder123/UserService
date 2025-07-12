@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+
+message Empty {}
+
+message User {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+  bool isActive = 5;
+  bool isDeleted = 6;
+  bool isAdminDeleted = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
+}
+
+message GetAllUsersResponse {
+  repeated User users = 1;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message DeleteUserRequest {
+  string user_id = 1;
+}
+
+message DeleteUserResponse {
+  string message = 1;
+}
+
+message UpdateIsAdminDeletedRequest {
+  string user_id = 1;
+  bool isAdminDeleted = 2;
+}
+
+message UpdateIsAdminDeletedResponse {
+  string message = 1;
+}
+
+// --- Service Definition ---
+
+service UserService {
+  rpc GetAllUsers(Empty) returns (GetAllUsersResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse); // Soft delete
+  rpc UpdateIsAdminDeleted(UpdateIsAdminDeletedRequest) returns (UpdateIsAdminDeletedResponse);
+}

@@ -1,4 +1,4 @@
-import prisma from "client/prisma.client";
+import prisma from "../client/prisma.client";
 import { ApiResponse } from "../interfaces/user.helpers.interfaces";
 import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 
