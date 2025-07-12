@@ -10,10 +10,21 @@ const userProto = grpc.loadPackageDefinition(packageDefinition);
 
 //@ts-ignore
 const GetAllUsers = async (call: any, callback: any) => {
-    console.log("sdfaf");
     try {
-        const users = await prisma.user.findMany();
-        callback(null, { users });
+        const users = await prisma.user.findMany({select: {
+            user_id: true,
+            name: true,
+            email: true,
+            phone: true,
+            isActive: true,
+            isDeleted: true,
+            isAdminDeleted: true,
+            createdAt: true,
+            updatedAt: true,
+          },});
+        
+        console.log(users,"users prisma");
+        callback(null,{users});
     } catch (error) {
         callback(error);
     }
