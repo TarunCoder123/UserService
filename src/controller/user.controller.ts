@@ -17,6 +17,7 @@ class UserController implements Controller {
        this.router.post(`${this.path}/login`,this.userLogin);
        this.router.get(`${this.path}/logout`,this.userLogut);
        this.router.post(`${this.path}/change-password`,this.userChangePassword);
+       this.router.get(`${this.path}/Userlist`,this.userGetList);
     }
 
     /**
@@ -89,6 +90,17 @@ class UserController implements Controller {
         const email=String((req as any).user.email);
         const responseData=await userHelper.userChangePassword(oldPassword,newPassword,email);
         return sendResponse(res,responseData);
+    }
+    /**
+     * THer user can get the list of all the user 
+     * @param req
+     * @param res
+     * @returns
+     * 
+     */
+    public userGetList=async (req:Request,res:Response)=>{
+        const responseData=await userHelper.getUserList();
+        return sendResponse(res,responseData)
     }
      
 }

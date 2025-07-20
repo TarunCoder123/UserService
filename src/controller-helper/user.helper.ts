@@ -252,6 +252,31 @@ class UserHelper {
         }
     }
 
+    public getUserList = async () => {
+        try {
+            const responseData = await prisma.user.findMany();
+            if (!responseData) {
+                return {
+                    status: STATUS_CODES.UNAUTHORIZED,
+                    message: RESPONSE_MESSAGES.UNAUTHORIZED,
+                    error: true
+                }
+            }
+
+            return {
+                status: STATUS_CODES.SUCCESS,
+                message: RESPONSE_MESSAGES.FETCH_USER_SUCCESS,
+                error: false,
+                data: responseData
+            };
+        } catch (err: any) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
 }
 
 export default new UserHelper();

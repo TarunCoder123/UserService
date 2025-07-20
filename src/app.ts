@@ -8,6 +8,8 @@ import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import sendResponse from "./responses/response.helper";
 import { RESPONSE_MESSAGES, STATUS_CODES } from "./constants";
+import { rateLimiter } from "./middleware/rateLimit.middleware";
+
 require('dotenv').config
 
 class App {
@@ -57,6 +59,7 @@ class App {
             res.end(res.sentry + "\n");
             next();
         });
+        this.app.use(rateLimiter);
     }
 
     private initializeControllers(controllers:Controller[]) {
