@@ -61,7 +61,7 @@ class PropertyController implements Controller {
     return sendResponse(res,responseDataProperty);
   }
   /** 
-   * User can get all the property posted by him
+   * User can get all the property posted by him like and comment
    * @param req
    * @param res
    * @returns
@@ -71,6 +71,17 @@ class PropertyController implements Controller {
   const PropertyDataLikeAndComment=await propertyHelpers.getPropertyLikeAndCommentByMe(property_id);
   return sendResponse(res,PropertyDataLikeAndComment);
  }
+ /**
+  * User can get the comment reply of the specific comment 
+  * @parma req
+  * @param res
+  * @returns 
+  */
+  public getComments=async(req:any,res:Response)=>{
+    const property_id=String(req.query.property_id);
+    const PropertyDataLikeAndComment=await propertyHelpers.getPropertyLikeAndCommentByMe(property_id);
+    return sendResponse(res,PropertyDataLikeAndComment);
+  }
 }
 
 export default PropertyController;
