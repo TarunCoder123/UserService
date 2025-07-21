@@ -162,10 +162,10 @@ class propertyHelper {
             });
 
             return {
-                data:{property:property},
-                message:RESPONSE_MESSAGES.SAVEDATA,
+                data: { property: property },
+                message: RESPONSE_MESSAGES.SAVEDATA,
                 status: STATUS_CODES.SUCCESS,
-                error:false
+                error: false
             }
         } catch (err) {
             return {
@@ -181,96 +181,96 @@ class propertyHelper {
      * @param {string} email
      * @returns
     */
-    public getPropertyByMe = async (email:string):Promise<ApiResponse> => {
-        try{
-         // step 1:Fetch the userId from the user table
-         const user = await prisma.user.findUnique({
-            where: { email: email },
-            select: { user_id: true },
-        });
+    public getPropertyByMe = async (email: string): Promise<ApiResponse> => {
+        try {
+            // step 1:Fetch the userId from the user table
+            const user = await prisma.user.findUnique({
+                where: { email: email },
+                select: { user_id: true },
+            });
 
-        if (!user) {
+            if (!user) {
+                return {
+                    error: true,
+                    data: { message: RESPONSE_MESSAGES.USER_NOT_FOUND },
+                    status: Number(STATUS_CODES.NOTFOUND)
+                }
+            }
+
+            //step 2:Fetch the property by this userId
+            const propertyDetails = await prisma.propertyDetails.findMany({
+                where: { userId: user.user_id },
+                include: {
+                    //     PropertyComments:true,
+                    //     _count: {
+                    //         select: {
+                    //           PropertyLike: true,
+                    //         },
+                    //       },
+                    PropertyGallery: true
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+            });
+            return {
+                data: { property: propertyDetails },
+                message: RESPONSE_MESSAGES.SAVEDATA,
+                status: STATUS_CODES.SUCCESS,
+                error: false
+            }
+        } catch (err) {
             return {
                 error: true,
-                data: { message: RESPONSE_MESSAGES.USER_NOT_FOUND },
-                status: Number(STATUS_CODES.NOTFOUND)
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
             }
         }
-
-        //step 2:Fetch the property by this userId
-        const propertyDetails=await prisma.propertyDetails.findMany({
-            where:{userId: user.user_id},
-            include:{
-            //     PropertyComments:true,
-            //     _count: {
-            //         select: {
-            //           PropertyLike: true,
-            //         },
-            //       },
-               PropertyGallery:true
-             },
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
-        return {
-            data:{property:propertyDetails},
-            message:RESPONSE_MESSAGES.SAVEDATA,
-            status: STATUS_CODES.SUCCESS,
-            error:false
-        }
-    }catch(err){
-        return{
-            error:true,
-            message:RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
-            status:STATUS_CODES.INTERNALSERVER
-        }
-    }
     }
     /***
      * The user can see the property post by him the list of the like and comments
      * 
      * 
     */
-    public getPropertyLikeAndCommentByMe = async (property_id:string):Promise<ApiResponse> => {
-       try {
-        // fetch the properity like and comment on the basis of the property_id
-        const [propertiesLikeData, propertiesCommentData] = await Promise.all([
-            prisma.propertyLike.findMany({
-              where: { propertyId: property_id },
-              include: {
-                user: {
-                  select: { name: true, email: true },
+    public getPropertyLikeAndCommentByMe = async (property_id: string): Promise<ApiResponse> => {
+        try {
+            // fetch the properity like and comment on the basis of the property_id
+            const [propertiesLikeData, propertiesCommentData] = await Promise.all([
+                prisma.propertyLike.findMany({
+                    where: { propertyId: property_id },
+                    include: {
+                        user: {
+                            select: { name: true, email: true },
+                        },
+                    },
+                }),
+                prisma.propertyComments.findMany({
+                    where: { propertyId: property_id },
+                    include: {
+                        user: {
+                            select: { name: true, email: true },
+                        },
+                    },
+                }),
+            ]);
+            return {
+                data: {
+                    LikeData: propertiesLikeData,
+                    CommentData: propertiesCommentData
                 },
-              },
-            }),
-            prisma.propertyComments.findMany({
-              where: { propertyId: property_id },
-              include: {
-                user: {
-                  select: { name: true, email: true },
-                },
-              },
-            }),
-          ]);
-          return {
-            data:{
-                LikeData:propertiesLikeData,
-                CommentData:propertiesCommentData
-            },
-            message:RESPONSE_MESSAGES.FETCH_DATA_SUCCESS,
-            error:false,
-            status:Number(STATUS_CODES.SUCCESS)
-          }
-       }catch(err){
-            return{
-                error:true,
-                message:RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
-                status:STATUS_CODES.INTERNALSERVER
+                message: RESPONSE_MESSAGES.FETCH_DATA_SUCCESS,
+                error: false,
+                status: Number(STATUS_CODES.SUCCESS)
             }
-       }
+        } catch (err) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
     }
-    
+
 }
 
 export default new propertyHelper();
