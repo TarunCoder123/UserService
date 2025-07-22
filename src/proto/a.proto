@@ -49,6 +49,6 @@ message UpdateIsAdminDeletedResponse {
 service UserService {
   rpc GetAllUsers(Empty) returns (GetAllUsersResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse); // Soft delete
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse); 
   rpc UpdateIsAdminDeleted(UpdateIsAdminDeletedRequest) returns (UpdateIsAdminDeletedResponse);
 }
