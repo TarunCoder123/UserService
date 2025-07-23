@@ -73,12 +73,24 @@ class App {
             this.app.use('/api', controller.router);
         });
         //Unknown rotues handler
+        // this.app.use("/*path",(req: Request, res: Response) => {
+        //     sendResponse(res, {
+        //         status: STATUS_CODES.UNAUTHORIZED,
+        //         message: RESPONSE_MESSAGES.ROUTE_404,
+        //     })
+        // });
+        // this.app.all("/*path",(req: Request, res: Response) => {
+        //     sendResponse(res, {
+        //         status: STATUS_CODES.UNAUTHORIZED,
+        //         message: RESPONSE_MESSAGES.ROUTE_404,
+        //     })
+        // });
         this.app.use((req: Request, res: Response) => {
-            sendResponse(res, {
-                status: STATUS_CODES.UNAUTHORIZED,
-                message: "bhai mere cchod",
-            })
-        });
+                sendResponse(res, {
+                    status: STATUS_CODES.UNAUTHORIZED,
+                    message: RESPONSE_MESSAGES.ROUTE_404,
+                })
+            });
     }
 }
 
