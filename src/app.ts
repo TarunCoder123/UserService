@@ -9,14 +9,13 @@ import cookieParser from "cookie-parser";
 import sendResponse from "./responses/response.helper";
 import { RESPONSE_MESSAGES, STATUS_CODES } from "./constants";
 import { rateLimiter } from "./middleware/rateLimit.middleware";
-
-require('dotenv').config
+require('dotenv').config();
 
 class App {
     public app: express.Application;
-    // public req:express.Request;
-    // public res:express.Response;
-    // public next:express.NextFunction;
+    public req: express.Request = {} as express.Request;
+    public res: express.Response = {} as express.Response;
+    public next: express.NextFunction = () => {};
 
     constructor(controllers: Controller[]) {
         this.app = express();
@@ -66,20 +65,20 @@ class App {
 
     private initializeControllers(controllers: Controller[]) {
         // Check api status
-        // this.app.get("/", (req: Request, res: Response) => {
-        //     sendResponse(res, { message: RESPONSE_MESSAGES.API_SERVICE })
-        // });
-        // // Setup the controllers
-        // controllers.forEach((controller) => {
-        //     this.app.use('/api', controller.router);
-        // });
+        this.app.get("/", (req: Request, res: Response) => {
+            sendResponse(res, { message: RESPONSE_MESSAGES.API_SERVICE })
+        });
+        // Setup the controllers
+        controllers.forEach((controller) => {
+            this.app.use('/api', controller.router);
+        });
         //Unknown rotues handler
-         this.app.all("*",(req:Request,res: Response)=>{
-            sendResponse(res,{
+        this.app.use((req: Request, res: Response) => {
+            sendResponse(res, {
                 status: STATUS_CODES.UNAUTHORIZED,
-                message:RESPONSE_MESSAGES.ROUTE_404,
+                message: "bhai mere cchod",
             })
-         });
+        });
     }
 }
 
