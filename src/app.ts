@@ -66,20 +66,20 @@ class App {
 
     private initializeControllers(controllers: Controller[]) {
         // Check api status
-        this.app.get("/", (req: Request, res: Response) => {
-            sendResponse(res, { message: RESPONSE_MESSAGES.API_SERVICE })
-        });
-        // Setup the controllers
-        controllers.forEach((controller) => {
-            this.app.use('/api', controller.router);
-        });
+        // this.app.get("/", (req: Request, res: Response) => {
+        //     sendResponse(res, { message: RESPONSE_MESSAGES.API_SERVICE })
+        // });
+        // // Setup the controllers
+        // controllers.forEach((controller) => {
+        //     this.app.use('/api', controller.router);
+        // });
         //Unknown rotues handler
-        //  this.app.all("*",(req:Request,res: Response)=>{
-        //     sendResponse(res,{
-        //         status: STATUS_CODES.UNAUTHORIZED,
-        //         message:RESPONSE_MESSAGES.ROUTE_404,
-        //     })
-        //  });
+         this.app.all("*",(req:Request,res: Response)=>{
+            sendResponse(res,{
+                status: STATUS_CODES.UNAUTHORIZED,
+                message:RESPONSE_MESSAGES.ROUTE_404,
+            })
+         });
     }
 }
 
