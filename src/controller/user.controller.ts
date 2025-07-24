@@ -138,7 +138,7 @@ class UserController implements Controller {
      */
     public sendOTPEmail = async (req: Request, res: Response) => {
         const email = String(req.body.email);
-        const responseData = await userHelper.;
+        const responseData = await userHelper.sendOTPEmail(email);
         return sendResponse(res, responseData);
     }
     /**
