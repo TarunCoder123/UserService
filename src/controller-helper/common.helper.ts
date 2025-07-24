@@ -17,9 +17,11 @@ const sendOTPviaFast = async (phone: string, otp: string):Promise<void> => {
     const apiKey = env.API_KEY_OTP;
     // create the payload of the fast2sms 
     const payload : Fast2SMSPayload= {
-        route: "otp",
+        route: "dlt_manual",
+        message: "Your OTP is ##OTP##", 
         variable_values: otp,
-        numbers: phone.toString()
+        numbers: phone.toString(),
+        flash: "0"
     };
 
     await axios.post(env.API_ENDPOINT, payload, {
