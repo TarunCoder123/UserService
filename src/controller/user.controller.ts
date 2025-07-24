@@ -18,11 +18,14 @@ class UserController implements Controller {
        this.router.get(`${this.path}/logout`,this.userLogut);
        this.router.post(`${this.path}/change-password`,this.userChangePassword);
        this.router.get(`${this.path}/Userlist`,this.userGetList);
+       this.router.post(`${this.path}/send-otp`,this.sendOTP);
+       this.router.post(`${this.path}/verify-otp`,this.verifyOTP);
     }
 
     /**
      * It sign up of the user as it is first time visiting the website
      * @param req
+     * 
      * @param res
      * @returns
      */
@@ -102,7 +105,26 @@ class UserController implements Controller {
         const responseData=await userHelper.getUserList();
         return sendResponse(res,responseData)
     }
-     
+    /**
+     * The user can send the otp on thier mobile
+     * @param req
+     * @param res
+     * @returns
+     */
+    public sendOTP=async (req:Request,res:Response)=>{
+        const phone=String(req.body.phone);
+        const responseData=await userHelper.sendOTP(phone);
+        return sendResponse(res,responseData);
+    }
+    /**
+     * 
+     */
+    public verifyOTP=async (req:Request,res:Response)=>{
+       const phone=String(req.body.phone);
+       const otp=String(req.body.otp);
+       const responseData=await userHelper.verifyOTP(phone,otp);
+       return sendResponse(res,responseData);
+    }
 }
 
 export default UserController;

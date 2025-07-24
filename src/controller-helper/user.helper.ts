@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 import prisma from "../client/prisma.client";
 import { ApiResponse } from "../interfaces/user.helpers.interfaces";
-import { isValidEmail } from "./common.helper";
+import { generateOTP, isValidEmail, sendOTPviaFast, storeOTP, verifyOTP } from "./common.helper";
 import { decodeToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.utils';
 import redisHelper from '../helper/redis.helper';
 import { REDIS_ACCESS_TOKEN_EXP_TIME, REDIS_REFRESH_TOKEN_EXP_TIME } from '../constants/user.constant';
@@ -252,7 +252,7 @@ class UserHelper {
         }
     }
 
-    public getUserList = async () => {
+    public getUserList = async (): Promise<ApiResponse> => {
         try {
             const responseData = await prisma.user.findMany();
             if (!responseData) {
@@ -268,6 +268,78 @@ class UserHelper {
                 message: RESPONSE_MESSAGES.FETCH_USER_SUCCESS,
                 error: false,
                 data: responseData
+            };
+        } catch (err: any) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
+    /**
+     * The user can generate the otp and send to their mobile number
+     * @param {string} phone
+     * @returns
+     */
+    public sendOTP = async (phone: string): Promise<ApiResponse> => {
+        try {
+            if (!phone || phone == "undefined") {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.PHONE_NUMBER_MISSING,
+                    status: STATUS_CODES.BADREQUEST,
+                };
+            }
+            // OTP is generated 
+            const otp: string = generateOTP();
+
+            await sendOTPviaFast(phone, otp);
+            await storeOTP(phone, otp);
+
+            return {
+                error: false,
+                status: STATUS_CODES.SUCCESS,
+                message: RESPONSE_MESSAGES.SUCCESS_OTP
+            };
+        } catch (err: any) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
+    /**
+     * The user can generate the otp and send to their mobile number
+     * @param {string} phone
+     * @param {string} otp
+     * @returns
+     */
+    public verifyOTP = async (phone: string,otp: string): Promise<ApiResponse> => {
+        try {
+            if (!phone || phone == "undefined" || !otp || otp=="undefined") {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.PHONE_NUMBER_OR_OTP_MISSING,
+                    status: STATUS_CODES.BADREQUEST,
+                };
+            }
+            // verift the otp OTP is generated 
+            const isValid=await verifyOTP(phone,otp);
+            if(!isValid){
+                return {
+                    error:true,
+                    message:RESPONSE_MESSAGES.INVALID_OTP,
+                    status:STATUS_CODES.SUCCESS,
+                    data:{message:"Invalid otp is given"}
+                };
+            }
+
+            return {
+                error: false,
+                status: STATUS_CODES.SUCCESS,
+                message: RESPONSE_MESSAGES.OTP_VERIFIED
             };
         } catch (err: any) {
             return {

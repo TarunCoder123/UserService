@@ -63,7 +63,12 @@ export const ERR = {
     Max_LIMIT: "Invalid page limit (defaults to 10, maximum is 40)",
     USERNAME_EXIST: "Username already exists",
     API_SERVICE: "API Service is up",
-    INVALID_CREDENTIALS: "Invalid Credentials!"
+    INVALID_CREDENTIALS: "Invalid Credentials!",
+    PHONE_NUMBER_MISSING:"Phone number is required to send OTP",
+    PHONE_NUMBER_OR_OTP_MISSING:"Phone number  or otp is missing",
+    INVALID_OTP:"Invalid otp",
+    OTP_VERIFIED:"OTP verified successfully",
+    SUCCESS_OTP:"otp sent successfully",
   };
   
   export const UNDEFINED = "undefined";
