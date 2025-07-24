@@ -3,20 +3,15 @@ import { env } from "../config/env";
 import redisHelper from "../helper/redis.helper";
 import { REDIS_OTP_TTL_TIME } from "../constants/user.constant";
 import { Fast2SMSPayload } from "@interfaces";
-import nodemailer from "nodemailer";
-
-const transport = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: env.GMAIL_USER!,
-        pass: env.GMAIL_PASS!,
-    },
-});
+import MailService  from "../helper/email.helper";
+import crypto from "crypto";
 
 const isValidEmail = (email: string): boolean => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 };
+
+const generateResetToken = () => crypto.randomBytes(32).toString("hex");
 
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit otp
@@ -42,12 +37,7 @@ const sendOTPviaFast = async (phone: string, otp: string): Promise<void> => {
 };
 
 const sendOTPViaEmail = async (email: string, otp: string): Promise<void> => {
-    await transport.sendMail({
-        from: env.GMAIL_USER,
-        to: email,
-        subject: "Your OTP Code",
-        text: `Your OTP is ${otp}`
-    })
+    await MailService.sendOTP(email, otp);
 };
 
 const storeOTP = async (identifier: string, otp: string): Promise<void> => {
@@ -61,5 +51,7 @@ const verifyOTP = async (identifier: string, otp: string): Promise<boolean> => {
     return storedOTP === otp;
 };
 
-export { isValidEmail, generateOTP, verifyOTP, storeOTP, sendOTPviaFast, sendOTPViaEmail };
+// const storeResetToken=async (email)
+
+export { isValidEmail, generateOTP, verifyOTP, storeOTP, sendOTPviaFast, sendOTPViaEmail,generateResetToken };
 
