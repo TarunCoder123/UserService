@@ -1,6 +1,7 @@
 import * as redis from 'redis';
 import { log } from '../utils/helper.utils';
 import { REDIS_ERR_MSG, CLIENT_EVENTS } from '../constants/redis.constant';
+import { env } from '../config/env';
 require('dotenv').config();
 
 class Redis {
@@ -20,7 +21,7 @@ class Redis {
   public async connectRedis(): Promise<boolean> {
     try {
       this.client = redis.createClient({
-        url: `${process.env.REDIS_URL}/0`,
+        url: `${env.REDIS_URL}/0`,
       });
 
       this._bindRedisClientEvents();
