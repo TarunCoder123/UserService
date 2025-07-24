@@ -26,4 +26,7 @@ export const env={
 
     API_KEY_OTP: process.env.FAST2SMS_API_KEY,
     API_ENDPOINT: process.env.FAST2SMS_END_POINT || "",
+
+    GMAIL_USER: process.env.GMAIL_USER,
+    GMAIL_PASS: process.env.GMAIL_PASS,
 }

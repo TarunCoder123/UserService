@@ -13,13 +13,15 @@ class UserController implements Controller {
     }
 
     private initializeRoutes = () => {
-       this.router.post(`${this.path}/signup`,this.userSignup);
-       this.router.post(`${this.path}/login`,this.userLogin);
-       this.router.get(`${this.path}/logout`,this.userLogut);
-       this.router.post(`${this.path}/change-password`,this.userChangePassword);
-       this.router.get(`${this.path}/Userlist`,this.userGetList);
-       this.router.post(`${this.path}/send-otp`,this.sendOTP);
-       this.router.post(`${this.path}/verify-otp`,this.verifyOTP);
+        this.router.post(`${this.path}/signup`, this.userSignup);
+        this.router.post(`${this.path}/login`, this.userLogin);
+        this.router.get(`${this.path}/logout`, this.userLogut);
+        this.router.post(`${this.path}/change-password`, this.userChangePassword);
+        this.router.get(`${this.path}/Userlist`, this.userGetList);
+        this.router.post(`${this.path}/send-otp`, this.sendOTP);
+        this.router.post(`${this.path}/verify-otp`, this.verifyOTP);
+        this.router.post(`${this.path}/send-otp-email`, this.sendOTPEmail);
+        this.router.post(`${this.path}/verify-otp-email`, this.verifyOTPEmail);
     }
 
     /**
@@ -50,7 +52,7 @@ class UserController implements Controller {
             return sendResponse(res, userData);
         }
         const { access_token, refresh_token } = userData.data;
-        
+
         res.cookie('accessToken', access_token, {
             httpOnly: true,
             secure: true,
@@ -72,14 +74,14 @@ class UserController implements Controller {
      * @param res
      * @returns 
      */
-    public userLogut=async (req:Request,res:Response)=>{
-        const user=(req as any).user;
-        const logoutData=await userHelper.userLogout(user);
-        if(!logoutData?.error){
+    public userLogut = async (req: Request, res: Response) => {
+        const user = (req as any).user;
+        const logoutData = await userHelper.userLogout(user);
+        if (!logoutData?.error) {
             res.clearCookie('accessToken');
             res.clearCookie('refreshToken');
         }
-        return sendResponse(res,logoutData);
+        return sendResponse(res, logoutData);
     }
     /**
      * The user can chagnge the password of the account
@@ -87,12 +89,12 @@ class UserController implements Controller {
      * @param res
      * @returns
      */
-    public userChangePassword=async (req:Request,res:Response)=>{
-        const oldPassword=String(req.body.old_password);
-        const newPassword=String(req.body.new_password);
-        const email=String((req as any).user.email);
-        const responseData=await userHelper.userChangePassword(oldPassword,newPassword,email);
-        return sendResponse(res,responseData);
+    public userChangePassword = async (req: Request, res: Response) => {
+        const oldPassword = String(req.body.old_password);
+        const newPassword = String(req.body.new_password);
+        const email = String((req as any).user.email);
+        const responseData = await userHelper.userChangePassword(oldPassword, newPassword, email);
+        return sendResponse(res, responseData);
     }
     /**
      * THer user can get the list of all the user 
@@ -101,9 +103,9 @@ class UserController implements Controller {
      * @returns
      * 
      */
-    public userGetList=async (req:Request,res:Response)=>{
-        const responseData=await userHelper.getUserList();
-        return sendResponse(res,responseData)
+    public userGetList = async (req: Request, res: Response) => {
+        const responseData = await userHelper.getUserList();
+        return sendResponse(res, responseData)
     }
     /**
      * The user can send the otp on thier mobile
@@ -111,19 +113,45 @@ class UserController implements Controller {
      * @param res
      * @returns
      */
-    public sendOTP=async (req:Request,res:Response)=>{
-        const phone=String(req.body.phone);
-        const responseData=await userHelper.sendOTP(phone);
-        return sendResponse(res,responseData);
+    public sendOTP = async (req: Request, res: Response) => {
+        const phone = String(req.body.phone);
+        const responseData = await userHelper.sendOTP(phone);
+        return sendResponse(res, responseData);
     }
     /**
-     * 
+     * The user can verify the otp send on the mobile
+     * @param req
+     * @param res
+     * @returns
      */
-    public verifyOTP=async (req:Request,res:Response)=>{
-       const phone=String(req.body.phone);
-       const otp=String(req.body.otp);
-       const responseData=await userHelper.verifyOTP(phone,otp);
-       return sendResponse(res,responseData);
+    public verifyOTP = async (req: Request, res: Response) => {
+        const phone = String(req.body.phone);
+        const otp = String(req.body.otp);
+        const responseData = await userHelper.verifyOTP(phone, otp);
+        return sendResponse(res, responseData);
+    }
+    /**
+     * The user can send the otp on thier mobile
+     * @param req
+     * @param res
+     * @returns
+     */
+    public sendOTPEmail = async (req: Request, res: Response) => {
+        const email = String(req.body.email);
+        const responseData = await userHelper.;
+        return sendResponse(res, responseData);
+    }
+    /**
+     * The user can verify the otp send on the mobile
+     * @param req
+     * @param res
+     * @returns
+     */
+    public verifyOTPEmail = async (req: Request, res: Response) => {
+        const email = String(req.body.email);
+        const otp = String(req.body.otp);
+        const responseData = await userHelper.verifyOTPEmail(email, otp);
+        return sendResponse(res, responseData);
     }
 }
 

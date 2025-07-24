@@ -69,6 +69,7 @@ export const ERR = {
     INVALID_OTP:"Invalid otp",
     OTP_VERIFIED:"OTP verified successfully",
     SUCCESS_OTP:"otp sent successfully",
+    EMAIL_MISSING:"email is required to send OTP",
   };
   
   export const UNDEFINED = "undefined";
