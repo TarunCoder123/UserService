@@ -57,7 +57,7 @@ export const ERR = {
     EVENTCREATE: "Event create successfully.",
     NOT_VALID_QUERY: "Query is not Valid!",
     INVALID_ID: "Id is not valid!",
-    INVALID_NAME: "Name is not valid",
+    INVALID_USER: "User is not valid",
     UNAUTHORIZED: "Unauthorized!",
     ROUTE_404: "Route not found.",
     Max_LIMIT: "Invalid page limit (defaults to 10, maximum is 40)",
@@ -70,6 +70,8 @@ export const ERR = {
     OTP_VERIFIED:"OTP verified successfully",
     SUCCESS_OTP:"otp sent successfully",
     EMAIL_MISSING:"email is required to send OTP",
+    EMAIL_SENT: "Password reset email sent",
+    SUCCESS_CHANGED_PASSWORD: "Password is successfully changed"
   };
   
   export const UNDEFINED = "undefined";

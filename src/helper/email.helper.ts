@@ -14,6 +14,18 @@ class MailService {
             },
         });
     }
+    public async sendEmail(to: string, token: string): Promise<void> {
+        // const resetLink = `https://yourdomain.com/reset-password?token=${token}`;
+        const html = `<h3>Reset Password</h3>
+    <p>Click below to reset your password (valid for 15 min):</p>`;
+
+        await this.transporter.sendMail({
+            from: `"YourApp" <${env.GMAIL_USER}>`,
+            to,
+            subject: "Reset Your Password",
+            html,
+        });
+    };
 
     public async sendOTP(email: string, otp: string): Promise<void> {
         await this.transporter.sendMail({

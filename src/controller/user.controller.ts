@@ -3,6 +3,7 @@ import { Controller } from "@interfaces";
 import { Request, Response } from "express";
 import sendResponse from "../responses/response.helper";
 import userHelper from "../controller-helper/user.helper";
+import prisma from "../client/prisma.client";
 
 class UserController implements Controller {
     public path = '/auth';
@@ -22,6 +23,8 @@ class UserController implements Controller {
         this.router.post(`${this.path}/verify-otp`, this.verifyOTP);
         this.router.post(`${this.path}/send-otp-email`, this.sendOTPEmail);
         this.router.post(`${this.path}/verify-otp-email`, this.verifyOTPEmail);
+        this.router.post(`${this.path}/forget-password`,this.forgetPassword);
+        this.router.post(`${this.path}/reset-password`,this.userResetPassword);
     }
 
     /**
@@ -84,7 +87,16 @@ class UserController implements Controller {
         return sendResponse(res, logoutData);
     }
     /**
-     * The user can chagnge the password of the account
+     * The user can click to get the reset password link on the mail
+     * 
+     */
+    public forgetPassword = async (req: Request, res: Response) => {
+        const email = String(req.body.email);
+        const responseForgetPassword = await userHelper.forgetPassword(email);
+        return sendResponse(res, responseForgetPassword);
+    }
+    /**
+     * The user can change the password of the account
      * @param req
      * @param res
      * @returns
@@ -153,6 +165,19 @@ class UserController implements Controller {
         const responseData = await userHelper.verifyOTPEmail(email, otp);
         return sendResponse(res, responseData);
     }
+    /**
+     * The user can change the password of the account
+     * @param req
+     * @param res
+     * @returns
+     */
+    public userResetPassword = async (req: Request, res: Response) => {
+        const token = String(req.body.token);
+        const newPassword = String(req.body.new_password);
+        const responseData = await userHelper.userChangePasswordEmail(token, newPassword);
+        return sendResponse(res, responseData);
+    }
+
 }
 
 export default UserController;

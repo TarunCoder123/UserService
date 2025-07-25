@@ -3,9 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 import prisma from "../client/prisma.client";
 import { ApiResponse } from "../interfaces/user.helpers.interfaces";
-import { generateOTP, isValidEmail, sendOTPViaEmail, sendOTPviaFast, storeOTP, verifyOTP } from "./common.helper";
-import { decodeToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.utils';
+import { generateOTP, generateResetToken, isValidEmail, sendOTPViaEmail, sendOTPviaFast, storeOTP, verifyOTP } from "./common.helper";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.utils';
 import redisHelper from '../helper/redis.helper';
+import MailService from "../helper/email.helper";
 import { REDIS_ACCESS_TOKEN_EXP_TIME, REDIS_REFRESH_TOKEN_EXP_TIME } from '../constants/user.constant';
 
 
@@ -316,9 +317,9 @@ class UserHelper {
      * @param {string} otp
      * @returns
      */
-    public verifyOTP = async (phone: string,otp: string): Promise<ApiResponse> => {
+    public verifyOTP = async (phone: string, otp: string): Promise<ApiResponse> => {
         try {
-            if (!phone || phone == "undefined" || !otp || otp=="undefined") {
+            if (!phone || phone == "undefined" || !otp || otp == "undefined") {
                 return {
                     error: true,
                     message: RESPONSE_MESSAGES.PHONE_NUMBER_OR_OTP_MISSING,
@@ -326,13 +327,13 @@ class UserHelper {
                 };
             }
             // verift the otp OTP is generated 
-            const isValid=await verifyOTP(phone,otp);
-            if(!isValid){
+            const isValid = await verifyOTP(phone, otp);
+            if (!isValid) {
                 return {
-                    error:true,
-                    message:RESPONSE_MESSAGES.INVALID_OTP,
-                    status:STATUS_CODES.SUCCESS,
-                    data:{message:"Invalid otp is given"}
+                    error: true,
+                    message: RESPONSE_MESSAGES.INVALID_OTP,
+                    status: STATUS_CODES.SUCCESS,
+                    data: { message: "Invalid otp is given" }
                 };
             }
 
@@ -354,8 +355,8 @@ class UserHelper {
      * @param {string} email
      * @returns
      */
-    public sendOTPEmail=async (email:string)=>{
-        try{
+    public sendOTPEmail = async (email: string) => {
+        try {
             if (!email || email == "undefined") {
                 return {
                     error: true,
@@ -364,10 +365,10 @@ class UserHelper {
                 };
             }
 
-            const otp=generateOTP();
+            const otp = generateOTP();
 
-            await sendOTPViaEmail(email,otp);
-            await storeOTP(email,otp);
+            await sendOTPViaEmail(email, otp);
+            await storeOTP(email, otp);
 
             return {
                 error: false,
@@ -389,9 +390,9 @@ class UserHelper {
      * @param {string} otp
      * @returns
      */
-    public verifyOTPEmail = async (email: string,otp: string): Promise<ApiResponse> => {
+    public verifyOTPEmail = async (email: string, otp: string): Promise<ApiResponse> => {
         try {
-            if (!email || email == "undefined" || !otp || otp=="undefined") {
+            if (!email || email == "undefined" || !otp || otp == "undefined") {
                 return {
                     error: true,
                     message: RESPONSE_MESSAGES.PHONE_NUMBER_OR_OTP_MISSING,
@@ -399,13 +400,13 @@ class UserHelper {
                 };
             }
             // verift the otp OTP is generated 
-            const isValid=await verifyOTP(email,otp);
-            if(!isValid){
+            const isValid = await verifyOTP(email, otp);
+            if (!isValid) {
                 return {
-                    error:true,
-                    message:RESPONSE_MESSAGES.INVALID_OTP,
-                    status:STATUS_CODES.SUCCESS,
-                    data:{message:"Invalid otp is given"}
+                    error: true,
+                    message: RESPONSE_MESSAGES.INVALID_OTP,
+                    status: STATUS_CODES.SUCCESS,
+                    data: { message: "Invalid otp is given" }
                 };
             }
 
@@ -421,6 +422,90 @@ class UserHelper {
                 status: STATUS_CODES.INTERNALSERVER
             }
         }
+    }
+    /**
+     * The user can reset the password throught the reset link 
+     * @param {string} email
+     * @returns
+     */
+    public forgetPassword = async (email: string): Promise<ApiResponse> => {
+        try {
+            const user = await prisma.user.findUnique({ where: { email } });
+            if (!user) {
+                return {
+                    error: true,
+                    status: STATUS_CODES.NOTFOUND,
+                    message: RESPONSE_MESSAGES.INVALID_USER
+                }
+            }
+
+            const token = generateResetToken();
+            // store the token in the redis
+            await redisHelper.client.set(token, user.user_id.toString());
+
+            await MailService.sendEmail(email, token);
+
+            return {
+                error: false,
+                message: RESPONSE_MESSAGES.EMAIL_SENT,
+                status: STATUS_CODES.SUCCESS
+            }
+        } catch (err) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
+    /**
+     * The user can reset his password by the token that is send on the email
+     * @param {string} token
+     * @param {string} newPassword
+     * @returns
+     */
+    public userChangePasswordEmail = async (token: string, newPassword: string): Promise<ApiResponse> => {
+        try {
+        const user_id = await redisHelper.client.get(token);
+        if (!user_id) {
+            return {
+                error: true,
+                status: STATUS_CODES.BADREQUEST,
+                message: RESPONSE_MESSAGES.INVALID_CREDENTIALS,
+            }
+        }
+
+        const user = await prisma.user.findUnique({ where: { user_id } });
+        if (!user) {
+            return {
+                error: true,
+                status: STATUS_CODES.NOTFOUND,
+                message: RESPONSE_MESSAGES.INVALID_USER
+            }
+        }
+
+        const newHashedPassword = await bcrypt.hash(newPassword, 10);
+        await prisma.user.update({
+            where: { user_id: "abc" },
+            data: {
+                password: newHashedPassword,
+            },
+        });
+
+        await redisHelper.client.del(token);
+
+        return {
+            error: false,
+            message: RESPONSE_MESSAGES.SUCCESS_CHANGED_PASSWORD,
+            status: STATUS_CODES.SUCCESS
+        }
+       }catch(err) {
+        return {
+            error: true,
+            message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+            status: STATUS_CODES.INTERNALSERVER
+        }
+       }
     }
 }
 
