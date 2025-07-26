@@ -8,11 +8,15 @@ datasource db {
 }
 
 model User {
-  user_id          String             @id @default(uuid()) @db.Uuid  @map("user_id")
+  user_id          String             @id @default(uuid()) @map("user_id") @db.Uuid
   name             String?            @db.VarChar(255)
   email            String             @unique @db.VarChar(255)
   password         String             @db.VarChar(255)
   phone            String?            @db.VarChar(20)
+  avatarUrl        String?            @db.VarChar(500) 
+  bio              String?            @db.VarChar(300) 
+  location         String?            @db.VarChar(255) 
+  preferences      Json?
   isActive         Boolean            @default(true)
   isDeleted        Boolean            @default(true)
   isAdminDeleted   Boolean            @default(true)

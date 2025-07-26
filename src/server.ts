@@ -3,13 +3,13 @@ import { log } from "./utils/helper.utils";
 import DBConnectionHandler from "./connection"
 import redisHelper from "./helper/redis.helper";
 import { REDIS_ERR_MSG } from "./constants/redis.constant";
-import UserController from "./controller/user.controller";
+import AuthController from "./controller/auth.controller";
 import PropertyController from "./controller/property.controller";
 require('dotenv').config;
 
 (async () => {
     try {
-        const app = new App([new UserController(),new PropertyController()]);
+        const app = new App([new AuthController(),new PropertyController()]);
 
         // connect to the postgres server
         const isDBconnected = await DBConnectionHandler.createDBConnection();
