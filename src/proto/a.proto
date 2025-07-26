@@ -1,5 +1,19 @@
 syntax = "proto3";
 
+package user;
+
+service UserService {
+  rpc GetAllUsers(GetUsersQuery) returns (GetAllUsersResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse); 
+  rpc UpdateIsAdminDeleted(UpdateIsAdminDeletedRequest) returns (UpdateIsAdminDeletedResponse);
+
+  rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse);
+  rpc BanUser(BanUserRequest) returns (BanUserResponse);
+  rpc UnbanUser(UnbanUserRequest) returns (UnbanUserResponse);
+}
+
+// === Messages ===
 
 message Empty {}
 
@@ -11,13 +25,30 @@ message User {
   bool isActive = 5;
   bool isDeleted = 6;
   bool isAdminDeleted = 7;
-  string createdAt = 8;
-  string updatedAt = 9;
+  bool isBanned = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+}
+
+// === 1. Get All Users with Search/Filter/Sort/Pagination ===
+
+message GetUsersQuery {
+  string search = 1;              // search by name/email/phone
+  string sortBy = 2;              // e.g., "createdAt"
+  string sortOrder = 3;           // "asc" or "desc"
+  int32 limit = 4;                // page size
+  int32 offset = 5;               // pagination offset
+  bool onlyActive = 6;
+  bool onlyBanned = 7;
+  bool includeDeleted = 8;
 }
 
 message GetAllUsersResponse {
   repeated User users = 1;
+  int32 totalCount = 2;
 }
+
+// === 2. Get Single User ===
 
 message GetUserRequest {
   string user_id = 1;
@@ -27,6 +58,8 @@ message GetUserResponse {
   User user = 1;
 }
 
+// === 3. Delete User ===
+
 message DeleteUserRequest {
   string user_id = 1;
 }
@@ -34,6 +67,8 @@ message DeleteUserRequest {
 message DeleteUserResponse {
   string message = 1;
 }
+
+// === 4. Admin Soft Delete ===
 
 message UpdateIsAdminDeletedRequest {
   string user_id = 1;
@@ -44,11 +79,31 @@ message UpdateIsAdminDeletedResponse {
   string message = 1;
 }
 
-// --- Service Definition ---
+// === 5. Update Status (Deactivate/Suspend User) ===
 
-service UserService {
-  rpc GetAllUsers(Empty) returns (GetAllUsersResponse);
-  rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse); 
-  rpc UpdateIsAdminDeleted(UpdateIsAdminDeletedRequest) returns (UpdateIsAdminDeletedResponse);
+message UpdateUserStatusRequest {
+  string user_id = 1;
+  bool isActive = 2;
+}
+
+message UpdateUserStatusResponse {
+  string message = 1;
+}
+
+// === 6. Ban/Unban Users ===
+
+message BanUserRequest {
+  string user_id = 1;
+}
+
+message BanUserResponse {
+  string message = 1;
+}
+
+message UnbanUserRequest {
+  string user_id = 1;
+}
+
+message UnbanUserResponse {
+  string message = 1;
 }

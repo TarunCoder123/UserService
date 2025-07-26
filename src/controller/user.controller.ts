@@ -4,7 +4,6 @@ import { Request, Response } from "express";
 import { sessionCheck } from "../middleware/session.middleware";
 import userHelper from "../controller-helper/user.helper";
 import userProfileValidation from "validation/userProfile.validation";
-import { ApiResponse } from "interfaces/user.helpers.interfaces";
 import sendResponse from "responses/response.helper";
 import { uploadAvatar } from "../middleware/uploadAvatar.middleware";
 
@@ -21,6 +20,7 @@ class UserController implements Controller {
         this.router.patch(`${this.path}/profile`, userProfileValidation, sessionCheck, this.updateProfileDetails);
         this.router.post(`${this.path}/upload.avatar`, sessionCheck, uploadAvatar.single("avatar"), this.uploadAvatars);
         this.router.delete(`${this.path}/delete`, sessionCheck, this.deleteUser);
+        this.router.patch(`${this.path}/profile/preferences`,sessionCheck,this.userPreference);
     }
     /**
      * The user can get the detail about his profile 
@@ -67,6 +67,20 @@ class UserController implements Controller {
         const email = String(req.user.email);
         const deleteResponse = await userHelper.deleteUser(email);
         return sendResponse(res, deleteResponse);
+    }
+    /**
+     * This is the controller by which a user can add their preference 
+     * @param {any} req
+     * @param {Response} res
+     * @returns 
+     */ 
+    public userPreference=async (req:any,res:Response)=>{
+        const email=String(req.user.email);
+        const language=String(req.body.language);
+        const theme=String(req.body.theme);
+        const notifications=Boolean(req.body.notifications);
+        const userPreferenceResponse=await userHelper.userPreference(email,language,theme,notifications);
+        return sendResponse(res,userPreferenceResponse);
     }
 }
 

@@ -80,8 +80,10 @@ export const RESPONSE_MESSAGES = {
   INVALID_DATA: "Validation error in the request",
   MISSING_FIELD: "No fields provided for update.",
   PROFILE_UPDATED: "Profile updated successfully",
-  AVATAR_UPLOADED: "Avatar uploaded successfully"
-  SUCCESS_DELETED: "User successfully deleted"
+  AVATAR_UPLOADED: "Avatar uploaded successfully",
+  SUCCESS_DELETED: "User successfully deleted",
+  PREFERENCES_UPDATED:'Preferences updated successfully',
+  PREFERENCE_NOT_FOUND:'No preference data provided'
 };
 
 export const UNDEFINED = "undefined";

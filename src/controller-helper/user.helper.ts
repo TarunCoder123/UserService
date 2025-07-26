@@ -129,7 +129,7 @@ class UserHelper {
      * @param {string} email
      * @returns
      */
-    public deleteUser = async (email: string) => {
+    public deleteUser = async (email: string): Promise<ApiResponse> => {
         try {
 
             if (email == "undefined") {
@@ -158,6 +158,55 @@ class UserHelper {
                 message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
                 status: STATUS_CODES.INTERNALSERVER
             }
+        }
+    }
+    /**
+     * 
+     */
+    public userPreference = async (email: string, theme: string, language: string, notifications: boolean): Promise<ApiResponse> => {
+        try {
+            const existingUser = await prisma.user.findUnique({ where: { email } });
+            if (!existingUser) {
+                return {
+                    error: false,
+                    message: RESPONSE_MESSAGES.USER_NOT_FOUND,
+                    status: STATUS_CODES.BADREQUEST
+                }
+            }
+            const updatedData: any = {};
+            if (theme !== UNDEFINED) updatedData.theme = theme;
+            if (language !== UNDEFINED) updatedData.language = language;
+            if (notifications !== undefined) updatedData.notifications = notifications;
+
+            // If no update data is provided
+            if (Object.keys(updatedData).length === 0) {
+                return {
+                    error: true,
+                    status: STATUS_CODES.BADREQUEST,
+                    message: RESPONSE_MESSAGES.PREFERENCE_NOT_FOUND,
+                };
+            }
+
+            const updatedUserData = await prisma.user.update({
+                where: { email },
+                data: updatedData
+            });
+
+            return {
+                error: false,
+                data:updatedUserData,
+                message:RESPONSE_MESSAGES.PREFERENCES_UPDATED,
+                status:STATUS_CODES.SUCCESS
+            }
+
+        } catch (err) {
+
+           return {
+            error: true,
+            message:RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+            status:STATUS_CODES.INTERNALSERVER
+           }
+
         }
     }
 }
