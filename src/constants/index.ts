@@ -71,7 +71,8 @@ export const ERR = {
     SUCCESS_OTP:"otp sent successfully",
     EMAIL_MISSING:"email is required to send OTP",
     EMAIL_SENT: "Password reset email sent",
-    SUCCESS_CHANGED_PASSWORD: "Password is successfully changed"
+    SUCCESS_CHANGED_PASSWORD: "Password is successfully changed",
+    SUCESS_QR_CODE: "Scan this QR with Google Authenticator",
   };
   
   export const UNDEFINED = "undefined";

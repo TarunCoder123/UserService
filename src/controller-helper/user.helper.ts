@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 import prisma from "../client/prisma.client";
 import { ApiResponse } from "../interfaces/user.helpers.interfaces";
-import { generateOTP, generateResetToken, isValidEmail, sendOTPViaEmail, sendOTPviaFast, storeOTP, verifyOTP } from "./common.helper";
+import { generateOTP, generateResetToken, generateSecret, isValidEmail, sendOTPViaEmail, sendOTPviaFast, storeOTP, verifyOTP,qrCode } from "./common.helper";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.utils';
 import redisHelper from '../helper/redis.helper';
 import MailService from "../helper/email.helper";
@@ -252,7 +252,10 @@ class UserHelper {
             }
         }
     }
-
+    /**
+     * Any user can get the list of the user 
+     * @returns 
+     */
     public getUserList = async (): Promise<ApiResponse> => {
         try {
             const responseData = await prisma.user.findMany();
@@ -466,46 +469,87 @@ class UserHelper {
      */
     public userChangePasswordEmail = async (token: string, newPassword: string): Promise<ApiResponse> => {
         try {
-        const user_id = await redisHelper.client.get(token);
-        if (!user_id) {
+            const user_id = await redisHelper.client.get(token);
+            if (!user_id) {
+                return {
+                    error: true,
+                    status: STATUS_CODES.BADREQUEST,
+                    message: RESPONSE_MESSAGES.INVALID_CREDENTIALS,
+                }
+            }
+
+            const user = await prisma.user.findUnique({ where: { user_id } });
+            if (!user) {
+                return {
+                    error: true,
+                    status: STATUS_CODES.NOTFOUND,
+                    message: RESPONSE_MESSAGES.INVALID_USER
+                }
+            }
+
+            const newHashedPassword = await bcrypt.hash(newPassword, 10);
+            await prisma.user.update({
+                where: { user_id: "abc" },
+                data: {
+                    password: newHashedPassword,
+                },
+            });
+
+            await redisHelper.client.del(token);
+
+            return {
+                error: false,
+                message: RESPONSE_MESSAGES.SUCCESS_CHANGED_PASSWORD,
+                status: STATUS_CODES.SUCCESS
+            }
+        } catch (err) {
             return {
                 error: true,
-                status: STATUS_CODES.BADREQUEST,
-                message: RESPONSE_MESSAGES.INVALID_CREDENTIALS,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
             }
         }
+    }
+    /**
+     * The user can generate the secret and QRcode for the google authenticator
+     * @param {any} user
+     * @returns
+     */
+    public userGenerateMFASecret = async (user: any): Promise<ApiResponse> => {
+        try {
+            // generate the secret from the speakeasy
+            const secret = generateSecret(user?.email);
+            if (!secret || user.id==="undefined") {
+                return {
+                    error: true,
+                    status: STATUS_CODES.BADREQUEST,
+                    message: RESPONSE_MESSAGES.BADREQUEST
 
-        const user = await prisma.user.findUnique({ where: { user_id } });
-        if (!user) {
+                }
+            }
+
+            await prisma.user.update({
+                where: { email: user.email },
+                data: { mfaSecret: secret.base32 },
+            });
+
+            const QrCode=await qrCode(secret);
+
+            return {
+                error:false,
+                data:{
+                    qrCode:QrCode,
+                },
+                message:RESPONSE_MESSAGES.SUCESS_QR_CODE,
+                status:STATUS_CODES.SUCCESS
+            }
+        } catch (err) {
             return {
                 error: true,
-                status: STATUS_CODES.NOTFOUND,
-                message: RESPONSE_MESSAGES.INVALID_USER
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
             }
         }
-
-        const newHashedPassword = await bcrypt.hash(newPassword, 10);
-        await prisma.user.update({
-            where: { user_id: "abc" },
-            data: {
-                password: newHashedPassword,
-            },
-        });
-
-        await redisHelper.client.del(token);
-
-        return {
-            error: false,
-            message: RESPONSE_MESSAGES.SUCCESS_CHANGED_PASSWORD,
-            status: STATUS_CODES.SUCCESS
-        }
-       }catch(err) {
-        return {
-            error: true,
-            message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
-            status: STATUS_CODES.INTERNALSERVER
-        }
-       }
     }
 }
 

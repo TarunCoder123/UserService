@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import sendResponse from "../responses/response.helper";
 import userHelper from "../controller-helper/user.helper";
 import prisma from "../client/prisma.client";
+import { sessionCheck } from "../middleware/session.middleware";
 
 class UserController implements Controller {
     public path = '/auth';
@@ -25,6 +26,7 @@ class UserController implements Controller {
         this.router.post(`${this.path}/verify-otp-email`, this.verifyOTPEmail);
         this.router.post(`${this.path}/forget-password`,this.forgetPassword);
         this.router.post(`${this.path}/reset-password`,this.userResetPassword);
+        this.router.get(`${this.path}/mfa/setup`,sessionCheck,this.userGenerateMFASecret);
     }
 
     /**
@@ -177,7 +179,17 @@ class UserController implements Controller {
         const responseData = await userHelper.userChangePasswordEmail(token, newPassword);
         return sendResponse(res, responseData);
     }
-
+    /**
+     * This is the controller where user can generate the mfa secret for himself 
+     * @param {any} req
+     * @param {Response} res
+     * @returnssss
+     */
+    public userGenerateMFASecret = async (req:any,res:Response)=>{
+        const user=req.user;
+        const responseData=await userHelper.userGenerateMFASecret(user);
+        return sendResponse(res,responseData);
+    }
 }
 
 export default UserController;

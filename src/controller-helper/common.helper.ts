@@ -3,8 +3,10 @@ import { env } from "../config/env";
 import redisHelper from "../helper/redis.helper";
 import { REDIS_OTP_TTL_TIME } from "../constants/user.constant";
 import { Fast2SMSPayload } from "@interfaces";
-import MailService  from "../helper/email.helper";
+import MailService from "../helper/email.helper";
 import crypto from "crypto";
+import speakeasy from "speakeasy";
+import qrcode from "qrcode";
 
 const isValidEmail = (email: string): boolean => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,7 +53,14 @@ const verifyOTP = async (identifier: string, otp: string): Promise<boolean> => {
     return storedOTP === otp;
 };
 
-// const storeResetToken=async (email)
+const generateSecret = (email: string) => {
+    if (!email) return null;
+    return speakeasy.generateSecret({
+        name: `MyApp (${email})`,
+    });
+}
 
-export { isValidEmail, generateOTP, verifyOTP, storeOTP, sendOTPviaFast, sendOTPViaEmail,generateResetToken };
+const qrCode = async (secret: any) => { return await qrcode.toDataURL(secret.otpauth_url) };
+
+export { isValidEmail, generateOTP, verifyOTP, storeOTP, sendOTPviaFast, sendOTPViaEmail, generateResetToken, generateSecret,qrCode };
 

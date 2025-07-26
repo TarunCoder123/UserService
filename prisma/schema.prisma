@@ -18,6 +18,7 @@ model User {
   isAdminDeleted   Boolean            @default(true)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  mfaSecret        String?            @db.VarChar(255)
   PropertyComments PropertyComments[]
   PropertyDetails  PropertyDetails[]
   PropertyLike     PropertyLike[]
