@@ -3,17 +3,23 @@ import { Controller } from "@interfaces";
 import { Request, Response } from "express";
 import { sessionCheck } from "../middleware/session.middleware";
 import userHelper from "../controller-helper/user.helper";
+import userProfileValidation from "validation/userProfile.validation";
+import { ApiResponse } from "interfaces/user.helpers.interfaces";
+import sendResponse from "responses/response.helper";
+import { uploadAvatar } from "../middleware/uploadAvatar.middleware";
 
 class UserController implements Controller {
-    public path="/user";
-    public router= express.Router();
+    public path = "/user";
+    public router = express.Router();
 
     constructor() {
         this.initializeRoutes();
     }
 
-    private initializeRoutes=()=>{
-        this.router.get(`${this.path}/profile`,sessionCheck,this.getProfileDetails);
+    private initializeRoutes = () => {
+        this.router.get(`${this.path}/profile`, sessionCheck, this.getProfileDetails);
+        this.router.patch(`${this.path}/profile`, userProfileValidation, sessionCheck, this.updateProfileDetails);
+        this.router.post(`${this.path}/upload.avatar`,sessionCheck,uploadAvatar.single("avatar"),this.uploadAvatars);
     }
     /**
      * The user can get the detail about his profile 
@@ -21,12 +27,35 @@ class UserController implements Controller {
      * @param {Response} res
      * @returns
      */
-    public getProfileDetails = async (req:any,res:Response)=>{
-        const email=String(req.user.email);
-        const profileDetails=await userHelper.getProfileDetails(email);
-
+    public getProfileDetails = async (req: any, res: Response) => {
+        const email = String(req.user.email);
+        const profileDetails = await userHelper.getProfileDetails(email);
+        return sendResponse(res, profileDetails);
     }
-
+    /**
+     * The controller by which user can update the details about his profile like (bio,name,avatarUrl and location)
+     * @param {any} req
+     * @param {Response} res
+     * @returns
+     */
+    public updateProfileDetails = async (req: any, res: Response) => {
+        const email=String(req.user.email);
+        const UpdatedFields = req.updateUser;
+        const updateProfileData = await userHelper.updateProfileDetails(email,UpdatedFields);
+        return sendResponse(res, updateProfileData);
+    }
+    /**
+     * The controller by which user can upload there avatar in there bio
+     * @param {any} req
+     * @param {Response} res
+     * @returns
+     */
+    public uploadAvatars=async (req:any,res:Response)=>{
+        const email=String(req.user.email);
+        const file=req.file;
+        const uploadAvatarResponse=await userHelper.uploadAvatars(email,file);
+        return sendResponse(res,uploadAvatarResponse);
+    }
 }
 
 export default UserController;

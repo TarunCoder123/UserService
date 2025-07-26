@@ -9,7 +9,7 @@ class UserHelper {
     /**
      * The user can get the detial of his bio completly
      * @param {string} email
-     * @retunrs
+     * @returns
      */
     public getProfileDetails = async (email: string): Promise<ApiResponse> => {
         try {
@@ -47,6 +47,82 @@ class UserHelper {
                 status: STATUS_CODES.INTERNALSERVER
             }
         }
+    }
+    /**
+     * The user can update the details of the about his profile like (bio,name,avatarUrl and location)
+     * @param {string} email
+     * @param {any} UpdatedFields
+     * @returns
+     */
+    public updateProfileDetails = async (email: string, UpdatedFields: any): Promise<ApiResponse> => {
+        try {
+            if (Object.keys(UpdatedFields).length === 0) {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.MISSING_FIELD,
+                    status: STATUS_CODES.BADREQUEST
+                }
+            }
+
+            const updatedUser = await prisma.user.update({
+                where: { email: email },
+                data: UpdatedFields
+            })
+
+            return {
+                status: STATUS_CODES.SUCCESS,
+                message: RESPONSE_MESSAGES.PROFILE_UPDATED,
+                data: updatedUser,
+                error: false
+            }
+        } catch (err) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
+    /**
+     * The controller by which user can upload there avatar in there bio
+     * @param {string} email
+     * @param {any} file
+     * @returns
+     */
+    public uploadAvatars = async (email: string, file: any): Promise<ApiResponse> => {
+        try {
+        if(!file || email=="undefined"){
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INVALID_CREDENTIALS,
+                status:STATUS_CODES.BADREQUEST
+            }
+        }
+
+        const relativePath = `/uploads/avatars/${file.filename}`;
+
+        const updatedUser = await prisma.user.update({
+          where: { email },
+          data: { avatarUrl: relativePath },
+        });
+
+        return {
+            error: false,
+            message:RESPONSE_MESSAGES.AVATAR_UPLOADED,
+            data:{
+                avatarUrl: relativePath,
+                user: updatedUser, 
+            },
+            status:STATUS_CODES.SUCCESS
+        }
+  
+    } catch(err) {
+        return {
+            error: true,
+            message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+            status: STATUS_CODES.INTERNALSERVER
+        }
+    }
     }
 }
 

@@ -76,7 +76,11 @@ export const RESPONSE_MESSAGES = {
   SUCESS_QR_CODE: "Scan this QR with Google Authenticator",
   INVALID_TOKEN_MFA: "Invalid token of mfa Secret",
   VERFIED_MFA: "MFA Verified Successfully",
-  INVERFIED_MFA:"MFA Unverified user is not allowed"
+  INVERFIED_MFA: "MFA Unverified user is not allowed",
+  INVALID_DATA: "Validation error in the request",
+  MISSING_FIELD: "No fields provided for update.",
+  PROFILE_UPDATED:"Profile updated successfully",
+  AVATAR_UPLOADED:"Avatar uploaded successfully"
 };
 
 export const UNDEFINED = "undefined";

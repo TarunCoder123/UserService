@@ -9,13 +9,14 @@ import cookieParser from "cookie-parser";
 import sendResponse from "./responses/response.helper";
 import { RESPONSE_MESSAGES, STATUS_CODES } from "./constants";
 import { rateLimiter } from "./middleware/rateLimit.middleware";
+import path from "path";
 require('dotenv').config();
 
 class App {
     public app: express.Application;
     public req: express.Request = {} as express.Request;
     public res: express.Response = {} as express.Response;
-    public next: express.NextFunction = () => {};
+    public next: express.NextFunction = () => { };
 
     constructor(controllers: Controller[]) {
         this.app = express();
@@ -59,6 +60,9 @@ class App {
             next();
         });
         this.app.use(rateLimiter);
+        // Serve static files
+        this.app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+        
         // Apply globally: max 5 requests per 10 seconds
         // this.app.use(customRateLimiter({ windowMs: 10 * 1000, maxRequests: 5 }));
     }
@@ -86,11 +90,11 @@ class App {
         //     })
         // });
         this.app.use((req: Request, res: Response) => {
-                sendResponse(res, {
-                    status: STATUS_CODES.UNAUTHORIZED,
-                    message: RESPONSE_MESSAGES.ROUTE_404,
-                })
-            });
+            sendResponse(res, {
+                status: STATUS_CODES.UNAUTHORIZED,
+                message: RESPONSE_MESSAGES.ROUTE_404,
+            })
+        });
     }
 }
 
