@@ -79,8 +79,9 @@ export const RESPONSE_MESSAGES = {
   INVERFIED_MFA: "MFA Unverified user is not allowed",
   INVALID_DATA: "Validation error in the request",
   MISSING_FIELD: "No fields provided for update.",
-  PROFILE_UPDATED:"Profile updated successfully",
-  AVATAR_UPLOADED:"Avatar uploaded successfully"
+  PROFILE_UPDATED: "Profile updated successfully",
+  AVATAR_UPLOADED: "Avatar uploaded successfully"
+  SUCCESS_DELETED: "User successfully deleted"
 };
 
 export const UNDEFINED = "undefined";

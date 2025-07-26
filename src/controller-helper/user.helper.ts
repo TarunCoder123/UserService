@@ -84,45 +84,81 @@ class UserHelper {
         }
     }
     /**
-     * The controller by which user can upload there avatar in there bio
+     * The helper by which user can upload there avatar in there bio
      * @param {string} email
      * @param {any} file
      * @returns
      */
     public uploadAvatars = async (email: string, file: any): Promise<ApiResponse> => {
         try {
-        if(!file || email=="undefined"){
+            if (!file || email == "undefined") {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.INVALID_CREDENTIALS,
+                    status: STATUS_CODES.BADREQUEST
+                }
+            }
+
+            const relativePath = `/uploads/avatars/${file.filename}`;
+
+            const updatedUser = await prisma.user.update({
+                where: { email },
+                data: { avatarUrl: relativePath },
+            });
+
+            return {
+                error: false,
+                message: RESPONSE_MESSAGES.AVATAR_UPLOADED,
+                data: {
+                    avatarUrl: relativePath,
+                    user: updatedUser,
+                },
+                status: STATUS_CODES.SUCCESS
+            }
+
+        } catch (err) {
             return {
                 error: true,
-                message: RESPONSE_MESSAGES.INVALID_CREDENTIALS,
-                status:STATUS_CODES.BADREQUEST
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
             }
         }
-
-        const relativePath = `/uploads/avatars/${file.filename}`;
-
-        const updatedUser = await prisma.user.update({
-          where: { email },
-          data: { avatarUrl: relativePath },
-        });
-
-        return {
-            error: false,
-            message:RESPONSE_MESSAGES.AVATAR_UPLOADED,
-            data:{
-                avatarUrl: relativePath,
-                user: updatedUser, 
-            },
-            status:STATUS_CODES.SUCCESS
-        }
-  
-    } catch(err) {
-        return {
-            error: true,
-            message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
-            status: STATUS_CODES.INTERNALSERVER
-        }
     }
+    /**
+     * The helper by which a user can delete (soft delete)
+     * @param {string} email
+     * @returns
+     */
+    public deleteUser = async (email: string) => {
+        try {
+
+            if (email == "undefined") {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.INVALID_CREDENTIALS,
+                    status: STATUS_CODES.BADREQUEST
+                }
+            }
+
+            const dbUserDeleted = await prisma.user.update({
+                where: { email },
+                data: {
+                    isDeleted: true
+                }
+            });
+
+            return {
+                message: RESPONSE_MESSAGES.SUCCESS_DELETED,
+                error: false,
+                status: STATUS_CODES.SUCCESS
+            }
+        } catch (err) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
     }
 }
 

@@ -19,7 +19,8 @@ class UserController implements Controller {
     private initializeRoutes = () => {
         this.router.get(`${this.path}/profile`, sessionCheck, this.getProfileDetails);
         this.router.patch(`${this.path}/profile`, userProfileValidation, sessionCheck, this.updateProfileDetails);
-        this.router.post(`${this.path}/upload.avatar`,sessionCheck,uploadAvatar.single("avatar"),this.uploadAvatars);
+        this.router.post(`${this.path}/upload.avatar`, sessionCheck, uploadAvatar.single("avatar"), this.uploadAvatars);
+        this.router.delete(`${this.path}/delete`, sessionCheck, this.deleteUser);
     }
     /**
      * The user can get the detail about his profile 
@@ -39,9 +40,9 @@ class UserController implements Controller {
      * @returns
      */
     public updateProfileDetails = async (req: any, res: Response) => {
-        const email=String(req.user.email);
+        const email = String(req.user.email);
         const UpdatedFields = req.updateUser;
-        const updateProfileData = await userHelper.updateProfileDetails(email,UpdatedFields);
+        const updateProfileData = await userHelper.updateProfileDetails(email, UpdatedFields);
         return sendResponse(res, updateProfileData);
     }
     /**
@@ -50,11 +51,22 @@ class UserController implements Controller {
      * @param {Response} res
      * @returns
      */
-    public uploadAvatars=async (req:any,res:Response)=>{
-        const email=String(req.user.email);
-        const file=req.file;
-        const uploadAvatarResponse=await userHelper.uploadAvatars(email,file);
-        return sendResponse(res,uploadAvatarResponse);
+    public uploadAvatars = async (req: any, res: Response) => {
+        const email = String(req.user.email);
+        const file = req.file;
+        const uploadAvatarResponse = await userHelper.uploadAvatars(email, file);
+        return sendResponse(res, uploadAvatarResponse);
+    }
+    /**
+     * This is controller by which a user can delete the details by soft delete
+     * @param {any} req
+     * @param {Response} res
+     * @returns
+     */
+    public deleteUser = async (req: any, res: Response) => {
+        const email = String(req.user.email);
+        const deleteResponse = await userHelper.deleteUser(email);
+        return sendResponse(res, deleteResponse);
     }
 }
 
