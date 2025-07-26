@@ -62,5 +62,14 @@ const generateSecret = (email: string) => {
 
 const qrCode = async (secret: any) => { return await qrcode.toDataURL(secret.otpauth_url) };
 
-export { isValidEmail, generateOTP, verifyOTP, storeOTP, sendOTPviaFast, sendOTPViaEmail, generateResetToken, generateSecret,qrCode };
+const verifyMFA = (token: string, mfaSecret: string) => {
+    return speakeasy.totp.verify({
+        secret: mfaSecret!,
+        encoding: "base32",
+        token,
+        window: 1,
+    });
+}
+
+export { isValidEmail, generateOTP, verifyOTP, storeOTP, sendOTPviaFast, sendOTPViaEmail, generateResetToken, generateSecret, qrCode ,verifyMFA};
 

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
 import prisma from "../client/prisma.client";
 import { ApiResponse } from "../interfaces/user.helpers.interfaces";
-import { generateOTP, generateResetToken, generateSecret, isValidEmail, sendOTPViaEmail, sendOTPviaFast, storeOTP, verifyOTP,qrCode } from "./common.helper";
+import { generateOTP, generateResetToken, generateSecret, isValidEmail, sendOTPViaEmail, sendOTPviaFast, storeOTP, verifyOTP, qrCode, verifyMFA } from "./common.helper";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.utils';
 import redisHelper from '../helper/redis.helper';
 import MailService from "../helper/email.helper";
@@ -519,7 +519,7 @@ class UserHelper {
         try {
             // generate the secret from the speakeasy
             const secret = generateSecret(user?.email);
-            if (!secret || user.id==="undefined") {
+            if (!secret || user.id === "undefined") {
                 return {
                     error: true,
                     status: STATUS_CODES.BADREQUEST,
@@ -533,15 +533,57 @@ class UserHelper {
                 data: { mfaSecret: secret.base32 },
             });
 
-            const QrCode=await qrCode(secret);
+            const QrCode = await qrCode(secret);
+
 
             return {
-                error:false,
-                data:{
-                    qrCode:QrCode,
+                error: false,
+                data: {
+                    qrCode: QrCode,
                 },
-                message:RESPONSE_MESSAGES.SUCESS_QR_CODE,
-                status:STATUS_CODES.SUCCESS
+                message: RESPONSE_MESSAGES.SUCESS_QR_CODE,
+                status: STATUS_CODES.SUCCESS
+            }
+        } catch (err) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
+    /**
+     * The user can verify the generate token by the QR code by the google authenticator
+     * @param {string} token
+     * @param {any} user
+     * @returns
+     */
+    public verifyMFASecret = async (token: string, user: any): Promise<ApiResponse> => {
+        try {
+            const dbuser = await prisma.user.findUnique({ where: { email: user.email } });
+            if (!dbuser) {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.UNAUTHORIZED,
+                    status: STATUS_CODES.UNAUTHORIZED
+                }
+            }
+
+            const verified = verifyMFA(token, String(dbuser?.mfaSecret));
+
+            if (!verified) {
+                return {
+                    error: true,
+                    message: RESPONSE_MESSAGES.INVALID_TOKEN_MFA,
+                    status: STATUS_CODES.UNAUTHORIZED
+                }
+            }
+
+            return {
+                error: false,
+                data: { isVerified: verified },
+                message: RESPONSE_MESSAGES.VERFIED_MFA,
+                status: STATUS_CODES.SUCCESS
             }
         } catch (err) {
             return {

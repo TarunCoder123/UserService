@@ -24,9 +24,10 @@ class UserController implements Controller {
         this.router.post(`${this.path}/verify-otp`, this.verifyOTP);
         this.router.post(`${this.path}/send-otp-email`, this.sendOTPEmail);
         this.router.post(`${this.path}/verify-otp-email`, this.verifyOTPEmail);
-        this.router.post(`${this.path}/forget-password`,this.forgetPassword);
-        this.router.post(`${this.path}/reset-password`,this.userResetPassword);
-        this.router.get(`${this.path}/mfa/setup`,sessionCheck,this.userGenerateMFASecret);
+        this.router.post(`${this.path}/forget-password`, this.forgetPassword);
+        this.router.post(`${this.path}/reset-password`, this.userResetPassword);
+        this.router.get(`${this.path}/mfa/setup`, sessionCheck, this.userGenerateMFASecret);
+        this.router.post(`${this.path}/verify/path`, sessionCheck, this.verifyMFASecret);
     }
 
     /**
@@ -183,12 +184,25 @@ class UserController implements Controller {
      * This is the controller where user can generate the mfa secret for himself 
      * @param {any} req
      * @param {Response} res
-     * @returnssss
+     * @returns
      */
-    public userGenerateMFASecret = async (req:any,res:Response)=>{
-        const user=req.user;
-        const responseData=await userHelper.userGenerateMFASecret(user);
-        return sendResponse(res,responseData);
+    public userGenerateMFASecret = async (req: any, res: Response) => {
+        const user = req.user;
+        const responseData = await userHelper.userGenerateMFASecret(user);
+        return sendResponse(res, responseData);
+    }
+    /**
+     * This is the controller where user can verify the mfa secret that generate by him
+     * @param {any} req
+     * @param {Response} res
+     * @returns
+     */
+    public verifyMFASecret = async (req: any, res: Response) => {
+        const token = String(req.body.token);
+        const user = req.user;
+        const responseData = await userHelper.verifyMFASecret(token, user);
+        req.user.mfaVerified = responseData.data.isVerified;
+        return sendResponse(res, responseData);
     }
 }
 
