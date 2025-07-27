@@ -1,6 +1,7 @@
 import prisma from "../client/prisma.client";
 import { ApiResponse } from "../interfaces/user.helpers.interfaces";
 import { RESPONSE_MESSAGES, STATUS_CODES } from "../constants/index";
+import { status } from "@grpc/grpc-js";
 
 
 class propertyHelper {
@@ -270,7 +271,82 @@ class propertyHelper {
             }
         }
     }
+    /**
+     * 
+     * 
+     * 
+     */
+    public uploadPropertyPhoto = async (propertyId: string, files: any): Promise<ApiResponse> => {
+        try {
+            if (!files || (files as Express.Multer.File[]).length === 0) {
+                return {
+                    status: STATUS_CODES.BADREQUEST,
+                    message: RESPONSE_MESSAGES.NOT_FOUND,
+                    error: true
+                };
+            }
 
+            const galleryItems = await Promise.all(
+                files.map((file: any) =>
+                    prisma.propertyGallery.create({
+                        data: {
+                            imageUrl: `/uploads/properties/${file.filename}`,
+                            propertyId,
+                        },
+                    })
+                )
+            );
+
+            return {
+                error: false,
+                data: galleryItems,
+                message: RESPONSE_MESSAGES.UPDATED_SUCCESS,
+                status: STATUS_CODES.CREATED,
+            }
+        } catch (err) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
+    /**
+     * 
+     * 
+     * 
+     */
+    public likeProperty = async (propertyId: string, email: string) => {
+        try {
+            const user = await prisma.user.findUnique({ where: { email } });
+            if (!user) {
+                return {
+                    error: false,
+                    message: RESPONSE_MESSAGES.BADREQUEST,
+                    status: STATUS_CODES.BADREQUEST
+                }
+            }
+
+            const response = await prisma.propertyLike.create({
+                data: {
+                    userId: user.user_id,
+                    propertyId
+                }
+            });
+
+            return {
+                error: false,
+                status: STATUS_CODES.CREATED,
+                message: RESPONSE_MESSAGES.PROPERTY_LIKED,
+            }
+        } catch (err) {
+            return {
+                error: true,
+                message: RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+                status: STATUS_CODES.INTERNALSERVER
+            }
+        }
+    }
 }
 
 export default new propertyHelper();

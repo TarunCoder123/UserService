@@ -83,7 +83,8 @@ export const RESPONSE_MESSAGES = {
   AVATAR_UPLOADED: "Avatar uploaded successfully",
   SUCCESS_DELETED: "User successfully deleted",
   PREFERENCES_UPDATED:'Preferences updated successfully',
-  PREFERENCE_NOT_FOUND:'No preference data provided'
+  PREFERENCE_NOT_FOUND:'No preference data provided',
+  PROPERTY_LIKED:'property liked',
 };
 
 export const UNDEFINED = "undefined";
